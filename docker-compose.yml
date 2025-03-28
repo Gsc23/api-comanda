@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  php:
+    build: 
+      context: ./docker
+    image: phpdocker
+    container_name: api-container
+    ports:
+      - "8000:8000"
+    volumes:
+      - ".:/var/www/html/"
+    depends_on:
+      - mongodb
+      - composerinstall
+
+  mongodb:
+    image: mongo:4.4.2-bionic
+    container_name: api-database
+    ports:
+      - "27017:27017"
+    volumes:
+      - './storage/db-data:/data/db'
+
+  composerinstall:
+    container_name: composer-install
+    build:
+        context: ./docker
+    volumes:
+      - ".:/var/www/html/"
+    command: composer install
+
+volumes:
+  mongodb_data:
