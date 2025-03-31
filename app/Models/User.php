@@ -3,14 +3,16 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+use App\DTO\UserDTO;
+use App\ValueObjects\Username;
+use MongoDB\Laravel\Eloquent\Model as Eloquent;
+
+class User extends Eloquent
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    protected $connection = 'mongodb';
+    protected $collection = 'users';
+    protected $primaryKey = '_id';
 
     /**
      * The attributes that are mass assignable.
@@ -19,6 +21,10 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
+        'cpf',
+        'role',
+        'birthdate',
         'email',
         'password',
     ];
@@ -42,4 +48,23 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public static function factory()
+    {
+        return app()->make(self::class);
+    }
+
+    public function populate(UserDTO $userData): self
+    {
+        $this->fill([
+            'name' => $userData->name,
+            'username' => Username::factory($userData->name),
+            'cpf' => $userData->cpf,
+            'role' => $userData->role,
+            'birthdate' => $userData->birthdate,
+            'email' => $userData->email,
+            'password' => $userData->password,
+        ]);
+        return $this;
+    }
 }
