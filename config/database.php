@@ -34,18 +34,21 @@ return [
      */
 
     'connections' => [
-        'mongodb' => [
-            'dsn' => env('MONGODB_URI', 'mongodb://localhost:27017'),
+        'mongodb' => array(
             'driver' => 'mongodb',
-            'host' => env('DB_HOST', 'localhost'),
-            'port' => env('DB_PORT', 27017),
-            'database' => env('DB_DATABASE'),
-            'username' => env('DB_USERNAME'),
-            'password' => env('DB_PASSWORD'),
-            'options' => [
-                'database' => 'admin', // Define qual banco de dados utilizar por padrão
+            'host' => [
+                env('DB_HOST', 'localhost'),
+                env('DB_SHARD01', 'localhost'),
+                env('DB_SHARD02', 'localhost'),
             ],
-        ],
+            'port' => env('DB_PORT', 27017),
+            'username' => env('DB_USERNAME', ''),
+            'password' => env('DB_PASSWORD', ''),
+            'database' => env('DB_DATABASE', ''),
+            'options' => array(
+                'database' => env('DB_AUTHDATABASE', 'admin'),
+            ),
+        ),
     ],
 
     /*
