@@ -13,6 +13,8 @@ services:
     depends_on:
       - mongodb
       - composerinstall
+    networks: 
+      - skunk_network
 
   mongodb:
     image: mongo:4.4.2-bionic
@@ -21,6 +23,8 @@ services:
       - "27017:27017"
     volumes:
       - './storage/db-data:/data/db'
+    networks: 
+      - skunk_network
 
   composerinstall:
     container_name: composer-install
@@ -30,5 +34,6 @@ services:
       - ".:/var/www/html/"
     command: composer install
 
-volumes:
-  mongodb_data:
+networks:
+  skunk_network:
+    driver: bridge
