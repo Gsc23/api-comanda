@@ -1,0 +1,161 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Comanda Eletrônica",
+        "description": "Documentação da API de Comanda usando Swagger",
+        "contact": {
+            "email": "gsdacosta.24@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Listar usuários",
+                "description": "Retorna uma lista paginada de usuários com o paramêtro 'per_page' ou todos com 'all=true'",
+                "operationId": "getUsers",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Número de usuários por página",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "all",
+                        "in": "query",
+                        "description": "Se 'true', retorna todos os usuários sem paginação",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuários retornada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/User"
+                                            }
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Nenhum usuário encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Nenhum usuário encontrado."
+                                        },
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "title": "Usuário",
+                "required": [
+                    "id",
+                    "name",
+                    "username",
+                    "cpf",
+                    "role",
+                    "birthdate",
+                    "email"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "UUID único do usuário",
+                        "type": "string",
+                        "example": "21bc300c-558a-4d35-b6c5-7b4df6c3ff53"
+                    },
+                    "name": {
+                        "description": "Nome completo (nome e sobrenome)",
+                        "type": "string",
+                        "example": "Gustavo Almeida"
+                    },
+                    "username": {
+                        "description": "Gerado automaticamente a partir do nome",
+                        "type": "string",
+                        "example": "g.almeida"
+                    },
+                    "cpf": {
+                        "description": "CPF sem pontos e traços",
+                        "type": "string",
+                        "example": "12345678900"
+                    },
+                    "role": {
+                        "description": "Função do usuário no sistema",
+                        "type": "string",
+                        "example": "admin"
+                    },
+                    "birthdate": {
+                        "description": "Data de nascimento no formato DD/MM/AAAA",
+                        "type": "string",
+                        "example": "05/04/1995"
+                    },
+                    "email": {
+                        "description": "Endereço de e-mail do usuário",
+                        "type": "string",
+                        "format": "email",
+                        "example": "gustavo@example.com"
+                    },
+                    "created_at": {
+                        "description": "Data de criação do registro",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-04-01T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Data da última atualização do registro",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-04-01T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Usuários",
+            "description": "Usuários"
+        }
+    ]
+}
