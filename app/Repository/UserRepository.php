@@ -25,7 +25,7 @@ class UserRepository
 
     public function getAll()
     {
-        return $this->model->all();
+        return $this->model::all();
     }
 
     public function getById($id)

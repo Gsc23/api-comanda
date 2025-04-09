@@ -7,8 +7,8 @@ use App\Http\Requests\UserIndexRequest;
 use App\Http\Resources\ErrorResource;
 use App\Http\Resources\SuccessResource;
 use App\Http\Services\UserService;
-use Exception;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use Throwable;
 
 class UserController extends Controller
@@ -26,14 +26,12 @@ class UserController extends Controller
         log::info('Listando usuários');
         try {
             $handler = $this->indexHandler($request);
-            dd($handler);
-
-            $code = ($handler) ? 200 : 206;
+            $code = $this->codeHandler($handler);
 
             log::debug('Usuários listados com sucesso');
             return new SuccessResource([
-                'user' => $user,
-                'code' => 200,
+                'user' => $handler,
+                'code' => $code,
             ]);
         } catch (Throwable $e) {
             $response = new ErrorResource([
@@ -47,34 +45,6 @@ class UserController extends Controller
             log::error('Erro ao listar usuários: ' . $e->getMessage() . ' - ' . $e->getCode());
             return $response;
         }
-    }
-
-    private function listAll(UserIndexRequest $request)
-    {
-        if ($request->has('all') && $request->boolean('all')) {
-            return $this->service->listAll();
-        }
-    }
-
-    private function listPagination(UserIndexRequest $request)
-    {
-        $perPage = $request->get('per_page', 10);
-        return $this->service->list($perPage);
-    }
-
-    private function indexHandler(UserIndexRequest $request)
-    {
-        if (request()->get('per_page') && !request()->get('page')) {
-            throw new Exception('Se "per_page" for informado, o parâmetro "page" também deve ser.', 400);
-        }
-
-        dd('oi');
-
-        if ($request->has('all') && $request->boolean('all')) {
-            return $this->listAll($request);
-        }
-
-        return $this->listPagination($request);
     }
 
     public function store(StoreUserRequest $request)
@@ -191,5 +161,48 @@ class UserController extends Controller
             Log::error('Erro ao deletar usuário: ' . $id . ' - ' . $e->getMessage() . ' - ' . $e->getCode());
             return $response;
         }
+    }
+
+    private function listAll(UserIndexRequest $request)
+    {
+        $user = $this->service->listAll();
+        if (empty($user)) {
+            throw new InvalidArgumentException('Nenhum usuário encontrado', 404);
+        }
+
+        return $user;
+    }
+
+    private function listPagination(UserIndexRequest $request)
+    {
+        $user = $this->service->list($request->get('per_page', 10));
+        if (empty($user)) {
+            throw new InvalidArgumentException('Nenhum usuário encontrado', 404);
+        }
+
+        return $user;
+    }
+
+    private function indexHandler(UserIndexRequest $request)
+    {
+
+        if (($request->has('all') && $request->boolean('all')) || empty($request->query())) {
+            return $this->listAll($request);
+        }
+
+        return $this->listPagination($request);
+    }
+
+    private function codeHandler($handler)
+    {
+        if (
+            method_exists($handler, 'currentPage') &&
+            method_exists($handler, 'lastPage') &&
+            $handler->currentPage() != $handler->lastPage()
+        ) {
+            return 206;
+        }
+
+        return 200;
     }
 }

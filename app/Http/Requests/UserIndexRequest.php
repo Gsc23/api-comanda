@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UserIndexRequest extends FormRequest
 {
@@ -11,7 +13,7 @@ class UserIndexRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -30,9 +32,14 @@ class UserIndexRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             if ($this->has('per_page') && !$this->has('page')) {
-                $validator->errors()->add('page', 'O parâmetro "page" é obrigatório quando "per_page" está presente.');
+                $validator->errors()->add('message', 'O parâmetro "page" é obrigatório quando "per_page" está presente.');
+                $validator->errors()->add('code', 400);
             }
         });
     }
 
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json($validator->errors(), 400));
+    }
 }
