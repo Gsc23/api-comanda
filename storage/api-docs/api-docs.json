@@ -1,40 +1,37 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "API Comanda Eletrônica",
-        "description": "Documentação da API de Comanda usando Swagger",
-        "contact": {
-            "email": "gsdacosta.24@gmail.com"
-        },
+        "title": "API Comanda - Usuários",
+        "description": "API para gerenciamento de usuários",
         "version": "1.0.0"
     },
     "paths": {
-        "/api/user": {
+        "/api/users": {
             "get": {
                 "tags": [
                     "Usuários"
                 ],
                 "summary": "Listar usuários",
-                "description": "Retorna uma lista paginada de usuários com o paramêtro 'per_page' ou todos com 'all=true'",
-                "operationId": "getUsers",
+                "description": "Retorna uma lista de usuários com opção de paginação",
+                "operationId": "indexUser",
                 "parameters": [
+                    {
+                        "name": "all",
+                        "in": "query",
+                        "description": "Retornar todos os usuários sem paginação",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Número de usuários por página",
+                        "description": "Quantidade de registros por página",
                         "required": false,
                         "schema": {
                             "type": "integer",
                             "default": 10
-                        }
-                    },
-                    {
-                        "name": "all",
-                        "in": "query",
-                        "description": "Se 'true', retorna todos os usuários sem paginação",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
                         }
                     }
                 ],
@@ -45,15 +42,44 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "user": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/User"
-                                            }
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 200
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "code": {
+                                                    "type": "integer",
+                                                    "example": 200
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "206": {
+                        "description": "Lista parcial de usuários retornada com sucesso (paginada)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                },
+                                                "code": {
+                                                    "type": "integer",
+                                                    "example": 206
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -69,7 +95,347 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Nenhum usuário encontrado."
+                                            "example": "Nenhum usuário encontrado"
+                                        },
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Criar usuário",
+                "description": "Cria um novo usuário no sistema",
+                "operationId": "storeUser",
+                "requestBody": {
+                    "description": "Dados do usuário",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "João Silva"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "joao@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "senha123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuário criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                },
+                                                "code": {
+                                                    "type": "integer",
+                                                    "example": 201
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Os dados fornecidos são inválidos"
+                                        },
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 422
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/{id}": {
+            "get": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Buscar usuário",
+                "description": "Retorna os dados de um usuário específico",
+                "operationId": "showUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário encontrado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                },
+                                                "code": {
+                                                    "type": "integer",
+                                                    "example": 200
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuário não encontrado"
+                                        },
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Atualizar usuário",
+                "description": "Atualiza os dados de um usuário existente",
+                "operationId": "updateUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Dados do usuário",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "João Silva Atualizado"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "joao.atualizado@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "novaSenha123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "manager"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuário atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                },
+                                                "code": {
+                                                    "type": "integer",
+                                                    "example": 200
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuário não encontrado"
+                                        },
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Os dados fornecidos são inválidos"
+                                        },
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 422
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Excluir usuário",
+                "description": "Remove um usuário do sistema",
+                "operationId": "deleteUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário excluído com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "string",
+                                                    "example": "Usuário: 1 - Deletado com sucesso"
+                                                },
+                                                "code": {
+                                                    "type": "integer",
+                                                    "example": 200
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuário não encontrado"
                                         },
                                         "status": {
                                             "type": "integer",
