@@ -8,14 +8,24 @@ class UserRepository
 {
     protected $model;
 
-    public function __construct(User $user)
+    public function __construct()
     {
-        $this->model = $user;
+        $this->model = User::factory();
+    }
+
+    public static function factory()
+    {
+        app()->make(self::class);
+    }
+
+    public function getList($perPage)
+    {
+        return $this->model::paginate($perPage);
     }
 
     public function getAll()
     {
-        return $this->model->all();
+        return $this->model::all();
     }
 
     public function getById($id)

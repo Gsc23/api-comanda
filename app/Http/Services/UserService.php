@@ -16,7 +16,22 @@ class UserService
         $this->repository = $repository;
     }
 
-    public function list()
+    public static function factory()
+    {
+        app()->make(self::class);
+    }
+
+    public function list($paginate)
+    {
+        $list = $this->repository->getList($paginate);
+        if ($list->count() > 0) {
+            return $list;
+        }
+
+        throw new RepositoryException('Nenhum usuário encontrado.', 404);
+    }
+
+    public function listAll()
     {
         $list = $this->repository->getAll();
         if ($list->count() > 0) {
