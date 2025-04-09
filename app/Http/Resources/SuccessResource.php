@@ -15,10 +15,8 @@ class SuccessResource extends JsonResource
     {
         return [
             'success' => true,
-            'data' => [
-                'message' => $this->resource['user'] ?? 'Success',
-                'status' => $this->resource['status'] ?? 200,
-            ],
+            'message' => $this->resource['user'] ?? 'Success',
+            'status' => $this->resource['status'] ?? 200,
         ];
     }
 }
