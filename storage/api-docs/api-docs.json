@@ -6,38 +6,39 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/api/users": {
+        "/api/user": {
             "get": {
                 "tags": [
                     "Usuários"
                 ],
                 "summary": "Listar usuários",
-                "description": "Retorna uma lista de usuários com opção de paginação",
+                "description": "Retorna uma lista paginada de usuários. Os parâmetros per_page e page são obrigatórios.",
                 "operationId": "indexUser",
                 "parameters": [
-                    {
-                        "name": "all",
-                        "in": "query",
-                        "description": "Retornar todos os usuários sem paginação",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    },
                     {
                         "name": "per_page",
                         "in": "query",
                         "description": "Quantidade de registros por página",
-                        "required": false,
+                        "required": true,
                         "schema": {
                             "type": "integer",
                             "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número da página",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de usuários retornada com sucesso",
+                        "description": "Lista completa de usuários",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -50,7 +51,7 @@
                                                         "type": "object"
                                                     }
                                                 },
-                                                "code": {
+                                                "status": {
                                                     "type": "integer",
                                                     "example": 200
                                                 }
@@ -64,7 +65,7 @@
                         }
                     },
                     "206": {
-                        "description": "Lista parcial de usuários retornada com sucesso (paginada)",
+                        "description": "Lista parcial de usuários (paginada)",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -74,12 +75,38 @@
                                                 "user": {
                                                     "type": "object"
                                                 },
-                                                "code": {
+                                                "status": {
                                                     "type": "integer",
                                                     "example": 206
                                                 }
                                             },
                                             "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação nos parâmetros",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "per_page": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "O campo per_page é obrigatório."
+                                            }
+                                        },
+                                        "page": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "O campo page é obrigatório."
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -93,13 +120,18 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Nenhum usuário encontrado"
-                                        },
-                                        "status": {
-                                            "type": "integer",
-                                            "example": 404
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Nenhum usuário encontrado"
+                                                },
+                                                "status": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -117,7 +149,6 @@
                 "description": "Cria um novo usuário no sistema",
                 "operationId": "storeUser",
                 "requestBody": {
-                    "description": "Dados do usuário",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -125,8 +156,7 @@
                                 "required": [
                                     "name",
                                     "email",
-                                    "password",
-                                    "role"
+                                    "password"
                                 ],
                                 "properties": {
                                     "name": {
@@ -165,7 +195,7 @@
                                                 "user": {
                                                     "type": "object"
                                                 },
-                                                "code": {
+                                                "status": {
                                                     "type": "integer",
                                                     "example": 201
                                                 }
@@ -184,13 +214,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Os dados fornecidos são inválidos"
-                                        },
-                                        "status": {
-                                            "type": "integer",
-                                            "example": 422
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "integer",
+                                                    "example": 422
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -201,12 +235,12 @@
                 }
             }
         },
-        "/api/users/{id}": {
+        "/api/user/{id}": {
             "get": {
                 "tags": [
                     "Usuários"
                 ],
-                "summary": "Buscar usuário",
+                "summary": "Obter usuário",
                 "description": "Retorna os dados de um usuário específico",
                 "operationId": "showUser",
                 "parameters": [
@@ -216,13 +250,13 @@
                         "description": "ID do usuário",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Usuário encontrado com sucesso",
+                        "description": "Dados do usuário",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -232,7 +266,7 @@
                                                 "user": {
                                                     "type": "object"
                                                 },
-                                                "code": {
+                                                "status": {
                                                     "type": "integer",
                                                     "example": 200
                                                 }
@@ -251,13 +285,18 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Usuário não encontrado"
-                                        },
-                                        "status": {
-                                            "type": "integer",
-                                            "example": 404
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Usuário não encontrado"
+                                                },
+                                                "status": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -281,12 +320,11 @@
                         "description": "ID do usuário",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     }
                 ],
                 "requestBody": {
-                    "description": "Dados do usuário",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -299,7 +337,7 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "joao.atualizado@example.com"
+                                        "example": "joao.novo@example.com"
                                     },
                                     "password": {
                                         "type": "string",
@@ -308,7 +346,7 @@
                                     },
                                     "role": {
                                         "type": "string",
-                                        "example": "manager"
+                                        "example": "user"
                                     }
                                 },
                                 "type": "object"
@@ -328,7 +366,7 @@
                                                 "user": {
                                                     "type": "object"
                                                 },
-                                                "code": {
+                                                "status": {
                                                     "type": "integer",
                                                     "example": 200
                                                 }
@@ -347,13 +385,18 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Usuário não encontrado"
-                                        },
-                                        "status": {
-                                            "type": "integer",
-                                            "example": 404
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Usuário não encontrado"
+                                                },
+                                                "status": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -367,13 +410,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Os dados fornecidos são inválidos"
-                                        },
-                                        "status": {
-                                            "type": "integer",
-                                            "example": 422
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "integer",
+                                                    "example": 422
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -397,7 +444,7 @@
                         "description": "ID do usuário",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     }
                 ],
@@ -412,9 +459,9 @@
                                             "properties": {
                                                 "user": {
                                                     "type": "string",
-                                                    "example": "Usuário: 1 - Deletado com sucesso"
+                                                    "example": "Usuário: 123 - Deletado com sucesso"
                                                 },
-                                                "code": {
+                                                "status": {
                                                     "type": "integer",
                                                     "example": 200
                                                 }
@@ -433,13 +480,18 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Usuário não encontrado"
-                                        },
-                                        "status": {
-                                            "type": "integer",
-                                            "example": 404
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Usuário não encontrado"
+                                                },
+                                                "status": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
