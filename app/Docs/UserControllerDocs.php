@@ -8,67 +8,77 @@ namespace App\Docs;
  *     version="1.0.0",
  *     description="API para gerenciamento de usuários"
  * )
+ *
  * @OA\Get(
- *     path="/api/users",
+ *     path="/api/user",
  *     summary="Listar usuários",
- *     description="Retorna uma lista de usuários com opção de paginação",
+ *     description="Retorna uma lista paginada de usuários. Os parâmetros per_page e page são obrigatórios.",
  *     operationId="indexUser",
  *     tags={"Usuários"},
- *     @OA\Parameter(
- *         name="all",
- *         in="query",
- *         description="Retornar todos os usuários sem paginação",
- *         required=false,
- *         @OA\Schema(type="boolean")
- *     ),
  *     @OA\Parameter(
  *         name="per_page",
  *         in="query",
  *         description="Quantidade de registros por página",
- *         required=false,
+ *         required=true,
  *         @OA\Schema(type="integer", default=10)
+ *     ),
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         description="Número da página",
+ *         required=true,
+ *         @OA\Schema(type="integer", default=1)
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Lista de usuários retornada com sucesso",
+ *         description="Lista completa de usuários",
  *         @OA\JsonContent(
  *             @OA\Property(property="data", type="object",
  *                 @OA\Property(property="user", type="array", @OA\Items(type="object")),
- *                 @OA\Property(property="code", type="integer", example=200)
+ *                 @OA\Property(property="status", type="integer", example=200)
  *             )
  *         )
  *     ),
  *     @OA\Response(
  *         response=206,
- *         description="Lista parcial de usuários retornada com sucesso (paginada)",
+ *         description="Lista parcial de usuários (paginada)",
  *         @OA\JsonContent(
  *             @OA\Property(property="data", type="object",
  *                 @OA\Property(property="user", type="object"),
- *                 @OA\Property(property="code", type="integer", example=206)
+ *                 @OA\Property(property="status", type="integer", example=206)
  *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Erro de validação nos parâmetros",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="per_page", type="array", @OA\Items(type="string", example="O campo per_page é obrigatório.")),
+ *             @OA\Property(property="page", type="array", @OA\Items(type="string", example="O campo page é obrigatório."))
  *         )
  *     ),
  *     @OA\Response(
  *         response=404,
  *         description="Nenhum usuário encontrado",
  *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Nenhum usuário encontrado"),
- *             @OA\Property(property="status", type="integer", example=404)
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="message", type="string", example="Nenhum usuário encontrado"),
+ *                 @OA\Property(property="status", type="integer", example=404)
+ *             )
  *         )
  *     )
  * )
  *
  * @OA\Post(
- *     path="/api/users",
+ *     path="/api/user",
  *     summary="Criar usuário",
  *     description="Cria um novo usuário no sistema",
  *     operationId="storeUser",
  *     tags={"Usuários"},
  *     @OA\RequestBody(
  *         required=true,
- *         description="Dados do usuário",
  *         @OA\JsonContent(
- *             required={"name", "email", "password", "role"},
+ *             required={"name", "email", "password"},
  *             @OA\Property(property="name", type="string", example="João Silva"),
  *             @OA\Property(property="email", type="string", format="email", example="joao@example.com"),
  *             @OA\Property(property="password", type="string", format="password", example="senha123"),
@@ -81,7 +91,7 @@ namespace App\Docs;
  *         @OA\JsonContent(
  *             @OA\Property(property="data", type="object",
  *                 @OA\Property(property="user", type="object"),
- *                 @OA\Property(property="code", type="integer", example=201)
+ *                 @OA\Property(property="status", type="integer", example=201)
  *             )
  *         )
  *     ),
@@ -89,15 +99,17 @@ namespace App\Docs;
  *         response=422,
  *         description="Erro de validação",
  *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Os dados fornecidos são inválidos"),
- *             @OA\Property(property="status", type="integer", example=422)
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="message", type="string"),
+ *                 @OA\Property(property="status", type="integer", example=422)
+ *             )
  *         )
  *     )
  * )
  *
  * @OA\Get(
- *     path="/api/users/{id}",
- *     summary="Buscar usuário",
+ *     path="/api/user/{id}",
+ *     summary="Obter usuário",
  *     description="Retorna os dados de um usuário específico",
  *     operationId="showUser",
  *     tags={"Usuários"},
@@ -106,15 +118,15 @@ namespace App\Docs;
  *         in="path",
  *         description="ID do usuário",
  *         required=true,
- *         @OA\Schema(type="integer")
+ *         @OA\Schema(type="string")
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Usuário encontrado com sucesso",
+ *         description="Dados do usuário",
  *         @OA\JsonContent(
  *             @OA\Property(property="data", type="object",
  *                 @OA\Property(property="user", type="object"),
- *                 @OA\Property(property="code", type="integer", example=200)
+ *                 @OA\Property(property="status", type="integer", example=200)
  *             )
  *         )
  *     ),
@@ -122,14 +134,16 @@ namespace App\Docs;
  *         response=404,
  *         description="Usuário não encontrado",
  *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Usuário não encontrado"),
- *             @OA\Property(property="status", type="integer", example=404)
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="message", type="string", example="Usuário não encontrado"),
+ *                 @OA\Property(property="status", type="integer", example=404)
+ *             )
  *         )
  *     )
  * )
  *
  * @OA\Put(
- *     path="/api/users/{id}",
+ *     path="/api/user/{id}",
  *     summary="Atualizar usuário",
  *     description="Atualiza os dados de um usuário existente",
  *     operationId="updateUser",
@@ -139,16 +153,15 @@ namespace App\Docs;
  *         in="path",
  *         description="ID do usuário",
  *         required=true,
- *         @OA\Schema(type="integer")
+ *         @OA\Schema(type="string")
  *     ),
  *     @OA\RequestBody(
  *         required=true,
- *         description="Dados do usuário",
  *         @OA\JsonContent(
  *             @OA\Property(property="name", type="string", example="João Silva Atualizado"),
- *             @OA\Property(property="email", type="string", format="email", example="joao.atualizado@example.com"),
+ *             @OA\Property(property="email", type="string", format="email", example="joao.novo@example.com"),
  *             @OA\Property(property="password", type="string", format="password", example="novaSenha123"),
- *             @OA\Property(property="role", type="string", example="manager")
+ *             @OA\Property(property="role", type="string", example="user")
  *         )
  *     ),
  *     @OA\Response(
@@ -157,7 +170,7 @@ namespace App\Docs;
  *         @OA\JsonContent(
  *             @OA\Property(property="data", type="object",
  *                 @OA\Property(property="user", type="object"),
- *                 @OA\Property(property="code", type="integer", example=200)
+ *                 @OA\Property(property="status", type="integer", example=200)
  *             )
  *         )
  *     ),
@@ -165,22 +178,26 @@ namespace App\Docs;
  *         response=404,
  *         description="Usuário não encontrado",
  *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Usuário não encontrado"),
- *             @OA\Property(property="status", type="integer", example=404)
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="message", type="string", example="Usuário não encontrado"),
+ *                 @OA\Property(property="status", type="integer", example=404)
+ *             )
  *         )
  *     ),
  *     @OA\Response(
  *         response=422,
  *         description="Erro de validação",
  *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Os dados fornecidos são inválidos"),
- *             @OA\Property(property="status", type="integer", example=422)
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="message", type="string"),
+ *                 @OA\Property(property="status", type="integer", example=422)
+ *             )
  *         )
  *     )
  * )
  *
  * @OA\Delete(
- *     path="/api/users/{id}",
+ *     path="/api/user/{id}",
  *     summary="Excluir usuário",
  *     description="Remove um usuário do sistema",
  *     operationId="deleteUser",
@@ -190,15 +207,15 @@ namespace App\Docs;
  *         in="path",
  *         description="ID do usuário",
  *         required=true,
- *         @OA\Schema(type="integer")
+ *         @OA\Schema(type="string")
  *     ),
  *     @OA\Response(
  *         response=200,
  *         description="Usuário excluído com sucesso",
  *         @OA\JsonContent(
  *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="user", type="string", example="Usuário: 1 - Deletado com sucesso"),
- *                 @OA\Property(property="code", type="integer", example=200)
+ *                 @OA\Property(property="user", type="string", example="Usuário: 123 - Deletado com sucesso"),
+ *                 @OA\Property(property="status", type="integer", example=200)
  *             )
  *         )
  *     ),
@@ -206,8 +223,10 @@ namespace App\Docs;
  *         response=404,
  *         description="Usuário não encontrado",
  *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Usuário não encontrado"),
- *             @OA\Property(property="status", type="integer", example=404)
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="message", type="string", example="Usuário não encontrado"),
+ *                 @OA\Property(property="status", type="integer", example=404)
+ *             )
  *         )
  *     )
  * )

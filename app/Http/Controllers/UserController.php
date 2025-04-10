@@ -29,10 +29,17 @@ class UserController extends Controller
             $code = $this->codeHandler($handler);
 
             log::debug('Usuários listados com sucesso');
-            return new SuccessResource([
+
+            $response = new SuccessResource([
                 'user' => $handler,
-                'code' => $code,
+                'status' => $code,
             ]);
+
+            $response = $response->response();
+            $response->setStatusCode($code);
+
+            log::debug('Usuário criado com sucesso');
+            return $response;
         } catch (Throwable $e) {
             $response = new ErrorResource([
                 'message' => $e->getMessage(),
@@ -54,7 +61,7 @@ class UserController extends Controller
             $user = $this->service->handle($request);
             $response = new SuccessResource([
                 'user' => $user,
-                'code' => 201,
+                'status' => 201,
             ]);
 
             $response = $response->response();
@@ -83,7 +90,7 @@ class UserController extends Controller
             $user = $this->service->findUser($id);
             $response = new SuccessResource([
                 'user' => $user,
-                'code' => 200,
+                'status' => 200,
             ]);
 
             $response = $response->response();
@@ -112,7 +119,7 @@ class UserController extends Controller
             $user = $this->service->changeUser($request, $id);
             $response = new SuccessResource([
                 'user' => $this->service->findUser($id),
-                'code' => 200,
+                'status' => 200,
             ]);
 
             $response = $response->response();
@@ -141,7 +148,7 @@ class UserController extends Controller
             $this->service->destroy($id);
             $response = new SuccessResource([
                 'user' => 'Usuário: ' . $id . ' - Deletado com sucesso',
-                'code' => 200,
+                'status' => 200,
             ]);
 
             $response = $response->response();
@@ -185,11 +192,6 @@ class UserController extends Controller
 
     private function indexHandler(UserIndexRequest $request)
     {
-
-        if (($request->has('all') && $request->boolean('all')) || empty($request->query())) {
-            return $this->listAll($request);
-        }
-
         return $this->listPagination($request);
     }
 

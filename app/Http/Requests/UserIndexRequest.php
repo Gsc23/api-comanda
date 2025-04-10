@@ -24,8 +24,8 @@ class UserIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'per_page' => 'sometimes|integer|min:1',
-            'page' => 'sometimes|integer|min:1'];
+            'per_page' => 'required|integer|min:1',
+            'page' => 'required|integer|min:1'];
     }
 
     public function withValidator($validator)
