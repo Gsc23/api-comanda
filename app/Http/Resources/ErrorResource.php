@@ -14,10 +14,10 @@ class ErrorResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'success' => false,
+            'status' => $this->resource['status'] ?? 500,
             'data' => [
+                'success' => false,
                 'message' => $this->resource['message'] ?? 'Unknown error',
-                'status' => $this->resource['status'] ?? 500,
             ],
         ];
     }
